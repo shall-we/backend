@@ -7,7 +7,7 @@ let Folder_List = require('../models').folder_list;
 
 exports.register = async (req, res, next)=>{
 
-    console.log('create Folder');
+    console.log('create');
 
     //insert query
     const id= await Folder.create({
