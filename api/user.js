@@ -1,21 +1,17 @@
-let User = require("../models").user;
-
-//jwt token
-// let jwt = require("jsonwebtoken");
-// const env = process.env.NODE_ENV || 'development';
-// const jwt_conf = require(__dirname + '/../config/jwt.json')[env];
-// require('dotenv').config();
+let User = require('../models').user;
+let authToken = require('../lib/token');
 
 searchOne = data => {
-    return User.findOne(data).catch(err => {
-        console.log("findOne err : " + err);
+  return User.findOne(data)
+    .catch(err => {
+      console.log("findOne err : " + err);
     });
 };
 
 searchAll = data => {
-    return User.findAll(data).catch(err => {
-        console.log("findAll err : " + err);
-    });
+  return User.findAll(data).catch(err => {
+    console.log("findAll err : " + err);
+  });
 };
 
 // 회원가입
@@ -23,107 +19,89 @@ searchAll = data => {
 // name, email, password, profile
 
 exports.register = async (req, res, next) => {
-    console.log("join");
 
-    // auth_already_exists check
-    let result = await searchOne({
-        where: {
-            name: req.body.name,
-            email: req.body.email
-        }
-    });
+  console.log('join');
 
-    if (result) {
-        res.send({
-            result: "fail",
-            failType: "auth_already_exists"
-        });
-        return;
+  const { name, email, password, profile } = req.body;
+
+  let result = await searchOne({
+    where: {
+      name: name,
+      email: email,
     }
+  });
 
-    // insert query
-    User.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-        profile: req.body.profile
+  // auth_already_exists check
+  if (result) {
+    res.send({
+      result: "fail",
+      failType: "auth_already_exists"
+    });
+    return;
+  }
+
+  // insert query
+  User.create({
+    name: name,
+    email: email,
+    password: password,
+    profile: profile,
+  })
+    .then(result => {
+      res.send({
+        result: "success"
+      });
     })
-        .then(result => {
-            res.send({
-                result: "success"
-            });
-        })
-        .catch(err => {
-            console.log("[JOIN] create err : " + err);
-        });
+    .catch(err => {
+      console.log("[JOIN] create err : " + err);
+    });
 };
 
 // 로그인
 // application/json
 // email, password
 exports.login = async (req, res, next) => {
-    console.log("login");
+  console.log("login");
 
-    let fail = null;
+  let fail = null;
 
-    let result = await searchOne({
-        where: {
-            email: req.body.email
-        }
+  let result = await searchOne({
+    where: {
+      email: req.body.email,
+    }
+  });
+
+  // auth_not_exist check
+  if (!result) fail = "auth_not_exist";
+
+  // password_mismatch check
+  if (result && result.dataValues.password !== req.body.password)
+    fail = "password_mismatch";
+
+  if (fail !== null) {
+    res.send({
+      result: "fail",
+      failType: fail
     });
 
-    // auth_not_exist check
-    if (!result) fail = "auth_not_exist";
+    return;
+  }
 
-    // password_mismatch check
-    if (result && result.dataValues.password !== req.body.password)
-        fail = "password_mismatch";
-
-    if (fail !== null) {
-        res.send({
-            result: "fail",
-            failType: fail
-        });
-
-        return;
-    }
-
-    // console.log('jwt_conf', jwt_conf.secretKey);
-
-    // login jwt
-    // let tokens = jwt.sign({
-    //   _id: result.dataValues.id,
-    //   email: result.dataValues.email,
-
-    // }, jwt_conf.secretKey,
-    //   {
-    //     expiresIn: "1h",
-
-    //   }, (err, token) => {
-    //     if (err) {
-    //       console.log("jwt error : " + err);
-    //       return;
-    //     }
-
-    //     console.log('tokens : ' + token);
-    //     if(token)
-    //     {
-    //       res.cookie(
-    //         "user" , token
-    //       );
-    //     res.send({
-    //       result : "success",
-    //       token : token
-    //     });
-    //     }
-    //   });
+  authToken.createToken({
+    _id: result.dataValues.id,
+    email: result.dataValues.email,
+  }).then((token) => {
 
     res.send({
-        result: "success",
-        data: {
-            id: result.dataValues.id,
-            name: result.dataValues.name,
-            profile: result.dataValues.profile
-        }
+      result: "success",
+      token: token,
+      data: {
+        name: result.dataValues.name,
+        profile: result.dataValues.profile
+      }
     });
+
+  }).catch((err) => {
+    console.log('createToken error : ' + err);
+  });
 };
