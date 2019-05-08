@@ -1,14 +1,7 @@
 let User = require('../models').user;
-
-//jwt token
-// let jwt = require("jsonwebtoken");
-// const env = process.env.NODE_ENV || 'development';
-// const jwt_conf = require(__dirname + '/../config/jwt.json')[env];
-// require('dotenv').config();
+let authToken = require('../lib/token');
 
 searchOne = data => {
-
-
   return User.findOne(data)
     .catch(err => {
       console.log("findOne err : " + err);
@@ -30,11 +23,13 @@ exports.register = async (req, res, next) => {
 
   console.log('join');
 
+  const {name, email, password, profile} =req.body;
+
   // auth_already_exists check
   let result = await searchOne({
     where: {
-      name: req.body.name,
-      email: req.body.email,
+      name: name,
+      email: email,
     }
   });
 
@@ -48,10 +43,10 @@ exports.register = async (req, res, next) => {
 
   // insert query
   User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    profile: req.body.profile,
+    name: name,
+    email: email,
+    password: password,
+    profile: profile,
   })
     .then(result => {
       res.send({
@@ -70,6 +65,8 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
 
   console.log('login');
+
+  console.log(req.body);
 
   let fail = null;
 
@@ -96,43 +93,21 @@ exports.login = async (req, res, next) => {
     return;
   }
 
-  //console.log('jwt_conf', jwt_conf.secretKey);
+  authToken.createToken({
+    _id : result.dataValues.id,
+    email : result.dataValues.email,
+  }).then((token)=>{
 
-  //login jwt
-  // let tokens = jwt.sign({
-  //   _id: result.dataValues.id,
-  //   email: result.dataValues.email,
+    res.send({
+      result : "success",
+      token : token,
+      data :{
+        name : result.dataValues.name,
+        profile : result.dataValues.profile 
+      }
+    });
 
-  // }, jwt_conf.secretKey,
-  //   {
-  //     expiresIn: "1h",
-
-  //   }, (err, token) => {
-  //     if (err) {
-  //       console.log("jwt error : " + err);
-  //       return;
-  //     }
-
-  //     console.log('tokens : ' + token);
-  //     if(token)
-  //     {
-  //       res.cookie(
-  //         "user" , token
-  //       );
-  //     res.send({
-  //       result : "success",
-  //       token : token
-  //     });
-  //     }
-  //   });
-
-  res.send({
-    result : "success",
-    data :{
-      id : result.dataValues.id,
-      name : result.dataValues.name,
-      profile : result.dataValues.profile 
-    }
+  }).catch((err)=>{
+    console.log('createToken error : '+ err);
   });
-
 };
