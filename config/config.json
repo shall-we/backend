@@ -5,8 +5,7 @@
     "database": "wespace",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "operatorsAliases": false,
-    "define": {
+   "define": {
         "timestamps": false,
         "underscored" : true
     }
