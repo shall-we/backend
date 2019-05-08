@@ -96,6 +96,7 @@ exports.login = async (req, res, next) => {
       result: "success",
       token: token,
       data: {
+        id: result.dataValues.id,
         name: result.dataValues.name,
         profile: result.dataValues.profile
       }
