@@ -1,6 +1,5 @@
 let Folder = require("../models").folder;
 let Folder_List = require("../models").folder_list;
-
 // 회원가입
 // application/json
 // user_id, name
@@ -11,8 +10,7 @@ exports.register = async (req, res, next) => {
     //insert query
     const id = await Folder.create({
         name: req.body.name
-    })
-        .then(result => {
+    }).then(result => {
             return result.dataValues.id;
         })
         .catch(err => {
@@ -35,11 +33,29 @@ exports.register = async (req, res, next) => {
         });
 };
 
+exports.delete=async (req, res, next) => {
+  
+
+    Folder.destroy({
+        where: {id:req.params.id}
+    })
+    .then( result => {
+        res.send({
+            result: "success",
+            data: result
+        });
+    })
+    .catch( err => {
+        console.log("데이터 삭제 실패");
+    });
+}
+
 searchAll = data => {
     return Folder_List.findAll(data).catch(err => {
         console.log("findAll err : " + err);
     });
 };
+
 
 exports.getList = async (req, res, next) => {
     // Define the target key and the foreign key both in a relation
@@ -55,19 +71,52 @@ exports.getList = async (req, res, next) => {
             }
         ]
     });
-
-    console.log("node test22222::::", req.query.user_id);
     if (!result) {
         res.send({
             result: "error"
         });
         return;
     }
-    console.log("node test::::", result);
+    
     res.send({
         result: "success",
         data: result
     });
+
+};
+exports.getPrivateList = async (req, res, next) => {
+    var query = 'select name, permission from FOLDER_LIST,FOLDER where folder_id =id and folder_id IN(select folder_id as p_id  from FOLDER_LIST  group by folder_id having count(folder_id)< 2) and user_id=:id';
+    var values = {
+      id: req.query.user_id
+    };
+    Folder_List.sequelize.query(query, {replacements: values})
+    .spread(function (results, metadata) {
+        console.log('dddd',results);
+        res.send({
+            result: "success",
+            data: results
+        });
+      }, function (err) {
+  
+  
+      });
+};
+exports.getSharedList = async (req, res, next) => {
+    var query = 'select name, permission from FOLDER_LIST,FOLDER where folder_id =id  and user_id=:id and  folder_id IN(select folder_id as p_id  from FOLDER_LIST  group by folder_id having count(folder_id)>1)';
+    var values = {
+      id: req.query.user_id
+    };
+    Folder_List.sequelize.query(query, {replacements: values})
+    .spread(function (results, metadata) {
+       
+        res.send({
+            result: "success",
+            data: results
+        });
+      }, function (err) {
+  
+  
+      });
 };
 
 exports.share = async (req, res, next) => {
