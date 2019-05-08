@@ -9,13 +9,12 @@ searchOne = data => {
 };
 
 searchAll = data => {
-  return User.findAll(data)
-    .catch(err => {
-      console.log("findAll err : " + err);
-    });
+  return User.findAll(data).catch(err => {
+    console.log("findAll err : " + err);
+  });
 };
 
-// 회원가입 
+// 회원가입
 // application/json
 // name, email, password, profile
 
@@ -23,9 +22,8 @@ exports.register = async (req, res, next) => {
 
   console.log('join');
 
-  const {name, email, password, profile} =req.body;
+  const { name, email, password, profile } = req.body;
 
-  // auth_already_exists check
   let result = await searchOne({
     where: {
       name: name,
@@ -33,6 +31,7 @@ exports.register = async (req, res, next) => {
     }
   });
 
+  // auth_already_exists check
   if (result) {
     res.send({
       result: "fail",
@@ -54,19 +53,15 @@ exports.register = async (req, res, next) => {
       });
     })
     .catch(err => {
-      console.log('[JOIN] create err : ' + err);
+      console.log("[JOIN] create err : " + err);
     });
-
 };
 
 // 로그인
 // application/json
 // email, password
 exports.login = async (req, res, next) => {
-
-  console.log('login');
-
-  console.log(req.body);
+  console.log("login");
 
   let fail = null;
 
@@ -77,8 +72,7 @@ exports.login = async (req, res, next) => {
   });
 
   // auth_not_exist check
-  if (!result)
-    fail = "auth_not_exist";
+  if (!result) fail = "auth_not_exist";
 
   // password_mismatch check
   if (result && result.dataValues.password !== req.body.password)
@@ -87,27 +81,27 @@ exports.login = async (req, res, next) => {
   if (fail !== null) {
     res.send({
       result: "fail",
-      failType: fail,
+      failType: fail
     });
 
     return;
   }
 
   authToken.createToken({
-    _id : result.dataValues.id,
-    email : result.dataValues.email,
-  }).then((token)=>{
+    _id: result.dataValues.id,
+    email: result.dataValues.email,
+  }).then((token) => {
 
     res.send({
-      result : "success",
-      token : token,
-      data :{
-        name : result.dataValues.name,
-        profile : result.dataValues.profile 
+      result: "success",
+      token: token,
+      data: {
+        name: result.dataValues.name,
+        profile: result.dataValues.profile
       }
     });
 
-  }).catch((err)=>{
-    console.log('createToken error : '+ err);
+  }).catch((err) => {
+    console.log('createToken error : ' + err);
   });
 };
