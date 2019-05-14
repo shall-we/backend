@@ -13,4 +13,5 @@ router.get("/folder/shared", FolderAPI.getSharedList);
 router.get("/folder/private", FolderAPI.getPrivateList);
 router.get("/note/list", FolderAPI.getNoteList);
 router.delete("/folder/:id", FolderAPI.delete);
+router.patch("/folder/:id/:name", FolderAPI.modifyFolderName);
 module.exports = router;

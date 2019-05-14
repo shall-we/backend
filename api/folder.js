@@ -154,3 +154,15 @@ exports.getNoteList = async (req, res, next) => {
   
       });
 };
+
+exports.modifyFolderName = async (req, res, next) => {
+    console.log("test");
+    Folder.update({name: req.params.name},
+    {
+        where: {id: req.params.id}, returning: true})
+        .then(function(result) {
+        res.json(result[1][0]);
+    }).catch(function(err) {
+        console.log("데이터 수정 실패");
+    });
+};
