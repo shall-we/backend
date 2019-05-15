@@ -14,10 +14,12 @@ router.post("/folder/shared", FolderAPI.share);
 router.get("/folder/shared", FolderAPI.getSharedList);
 router.get("/folder/private", FolderAPI.getPrivateList);
 router.delete("/folder/:id", FolderAPI.delete);
-router.patch("/folder/:id/:name", FolderAPI.modifyFolderName);
+router.patch("/folder/:id/:name", FolderAPI.updateFolderName);
 
 // note
 router.get("/note/list", NoteAPI.getNoteList);
 router.post("/note",NoteAPI.register);
+router.patch("/note/:id/:name",NoteAPI.updateNoteName);
+router.patch("/note/status/:id/:status",NoteAPI.setStatus);
 
 module.exports = router;

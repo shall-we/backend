@@ -102,7 +102,7 @@ exports.share = async (req, res, next) => {
         });
 };
 
-exports.modifyFolderName = async (req, res, next) => {
+exports.updateFolderName = async (req, res, next) => {
     console.log("test");
     Folder.update({name: req.params.name},
     {
