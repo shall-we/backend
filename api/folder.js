@@ -35,13 +35,12 @@ exports.register = async (req, res, next) => {
 };
 
 exports.getPrivateList = async (req, res, next) => {
-    var query = 'select name, permission,folder_id from FOLDER_LIST,FOLDER where folder_id =id and folder_id IN(select folder_id as p_id  from FOLDER_LIST  group by folder_id having count(folder_id)< 2) and user_id=:id';
+    var query = 'select b.name, a.permission,a.folder_id, (select count(*) from note , status where a.folder_id=note.folder_id and note.id = status.id and status.status <> "DELETED") as count from FOLDER_LIST a,FOLDER b where a.folder_id =b.id and a.folder_id IN(select folder_id as p_id from FOLDER_LIST group by folder_id having count(folder_id)< 2) and user_id=:id';
     var values = {
       id: req.query.user_id
     };
     Folder_List.sequelize.query(query, {replacements: values})
     .spread(function (results, metadata) {
-        console.log('dddd',results);
         res.send({
             result: "success",
             data: results
@@ -103,7 +102,6 @@ exports.share = async (req, res, next) => {
 };
 
 exports.updateFolderName = async (req, res, next) => {
-    console.log("test");
     Folder.update({name: req.params.name},
     {
         where: {id: req.params.id}, returning: true})

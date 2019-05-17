@@ -40,7 +40,7 @@ exports.register = async (req, res, next) => {
             return result.dataValues.id;
         })
         .catch(err => {
-            console.log("[Folder] create err : " + err);
+            console.log("[Note] create err : " + err);
         });
 
     Status.create({
@@ -56,12 +56,12 @@ exports.register = async (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log("[Folder] create err : " + err);
+            console.log("[Note] create err : " + err);
         });
 };
 
 exports.updateNoteName = async (req, res, next) => {
-    console.log("test");
+  
     Note.update({name: req.params.name},
     {
         where: {id: req.params.id}, returning: true})
@@ -79,7 +79,7 @@ exports.setStatus=async (req, res, next) => {
         .then(function(result) {
         res.json(result[1][0]);
     }).catch(function(err) {
-        console.log("데이터 수정 실패");
+        console.log("Note데이터 수정 실패");
     });
 }
 
