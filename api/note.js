@@ -1,6 +1,14 @@
 let Note = require("../models").note;
 let Status = require("../models").status;
 const Sequelize = require('sequelize');
+const uuid4=require('uuid4');
+
+
+const uuid = () => {
+    const tokens = uuid4().split('-')
+    return tokens[2] + tokens[1] + tokens[0] + tokens[3] + tokens[4]
+  }
+
 
 exports.getNoteList = async (req, res, next) => {
     var query = 'SELECT * FROM note as a, status as b where a.id=b.id and a.folder_id=:id and b.status <> "DELETED"';
@@ -27,7 +35,7 @@ exports.register = async (req, res, next) => {
     const id = await Note.create({
         name: req.body.name,
         folder_id: req.body.folder_id,
-        content: Sequelize.fn('NOW')
+        content: uuid()
     }).then(result => {
             return result.dataValues.id;
         })
