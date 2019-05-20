@@ -4,10 +4,37 @@ const pino = require('express-pino-logger')();
 const cookieParser = require('cookie-parser');
 const mysql_db = require('./models/index');
 const url = require('url');
+const cors = require('cors');
+
+
 
 
 const app = express();
+
 const server = require('http').Server(app);
+
+
+app.use(cors({ origin: '*' }));
+//소켓통신
+const socketio=require('socket.io');
+const io=socketio.listen(server);
+
+io.on('connection',(socket)=>{
+  console.log('사용자 접속::',socket.client.id)
+  socket.on('updateFolderList',(msg)=>{
+
+    console.log('메세지::',msg);
+    io.emit('updateFolderList',msg);
+  
+  });
+  socket.on('updateNoteList',(msg)=>{
+
+    console.log('메세지::',msg);
+    io.emit('updateNoteList',msg);
+  
+  });
+})
+//
 
 
 const indexRouter = require('./api/index');
