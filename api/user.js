@@ -8,16 +8,21 @@ searchOne = data => {
     });
 };
 
-searchAll = data => {
-  return User.findAll(data).catch(err => {
-    console.log("findAll err : " + err);
+exports.getUserList = async (req, res, next) => {
+  // console.log('[backend] getUserList is entered');
+  return User.findAll({
+    attributes: ['name', 'id']
+  }).then(function(results) {
+      res.json(results);
+  }).catch(err => {
+      console.log("getUserList err : " + err);
   });
 };
+
 
 // 회원가입
 // application/json
 // name, email, password, profile
-
 exports.register = async (req, res, next) => {
 
   console.log('join');
