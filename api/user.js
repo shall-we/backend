@@ -9,14 +9,21 @@ searchOne = data => {
 };
 
 exports.getUserList = async (req, res, next) => {
-  // console.log('[backend] getUserList is entered');
-  return User.findAll({
-    attributes: ['name', 'id']
-  }).then(function(results) {
-      res.json(results);
-  }).catch(err => {
-      console.log("getUserList err : " + err);
-  });
+ var query = 'select a.id, a.name, (select true from folder_list where folder_id=:id and user_id=a.id ) as isShared  from user a';
+    var values = {
+      id: req.query.folder_id
+    };
+    User.sequelize.query(query, {replacements: values})
+    .spread(function (results, metadata) {
+       
+        res.send({
+            result: "success",
+            data: results
+        });
+      }, function (err) {
+  
+  
+      });
 };
 
 
