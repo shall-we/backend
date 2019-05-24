@@ -100,6 +100,20 @@ exports.share = async (req, res, next) => {
             console.log("[Folder] share err : " + err);
         });
 };
+exports.unshare = async (req, res, next) => {
+    Folder_List.destroy({
+        where: {folder_id:req.params.folder_id,user_id:req.params.user_id}
+    })
+    .then( result => {
+        res.send({
+            result: "success",
+            data: result
+        });
+    })
+    .catch( err => {
+        console.log("데이터 삭제 실패");
+    });
+};
 
 exports.updateFolderName = async (req, res, next) => {
     Folder.update({name: req.params.name},
