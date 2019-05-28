@@ -1,14 +1,14 @@
 let User = require('../models').user;
 let authToken = require('../lib/token');
 
-searchOne = data => {
+exports.searchOne = data => {
   return User.findOne(data)
     .catch(err => {
       console.log("findOne err : " + err);
     });
 };
 
-searchAll = data => {
+exports.searchAll = data => {
   return User.findAll(data).catch(err => {
     console.log("findAll err : " + err);
   });
@@ -20,11 +20,9 @@ searchAll = data => {
 
 exports.register = async (req, res, next) => {
 
-  console.log('join');
-
   const { name, email, password, profile } = req.body;
 
-  let result = await searchOne({
+  let result = await exports.searchOne({
     where: {
       name: name,
       email: email,
@@ -65,7 +63,7 @@ exports.login = async (req, res, next) => {
 
   let fail = null;
 
-  let result = await searchOne({
+  let result = await exports.searchOne({
     where: {
       email: req.body.email,
     }
