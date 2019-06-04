@@ -30,7 +30,8 @@ module.exports = function(sequelize, DataTypes) {
 
   // note 1 : attachment n
   note.associate = (models) =>{
-    note.hasMany(models.attachment, {foreignKey : 'note_id', onDelete : 'cascade' });
+    note.hasMany(models.attachment, {foreignKey : 'note_id', onDelete : 'cascade' }),
+    note.hasMany(models.folder_list, {foreignKey: 'folder_id' });
   };
 
   return note;

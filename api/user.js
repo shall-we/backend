@@ -1,45 +1,44 @@
-let User = require('../models').user;
-let authToken = require('../lib/token');
+let User = require("../models").user;
+let Folder_List = require("../models").folder_list;
+let Note = require("../models").note;
+const Sequelize = require('sequelize');
+let authToken = require("../lib/token");
 
 searchOne = data => {
-  return User.findOne(data)
-    .catch(err => {
-      console.log("findOne err : " + err);
-    });
+  return User.findOne(data).catch(err => {
+    console.log("findOne err : " + err);
+  });
 };
 
 exports.getUserList = async (req, res, next) => {
- var query = 'select a.id, a.name, (select permission from folder_list where folder_id=:id and user_id=a.id ) as isShared  from user a';
-    var values = {
-      id: req.query.folder_id
-    };
-    User.sequelize.query(query, {replacements: values})
-    .spread(function (results, metadata) {
-       
-        res.send({
-            result: "success",
-            data: results
-        });
-      }, function (err) {
-  
-  
+  var query =
+    "select a.id, a.name, (select permission from folder_list where folder_id=:id and user_id=a.id ) as isShared  from user a";
+  var values = {
+    id: req.query.folder_id
+  };
+  User.sequelize.query(query, { replacements: values }).spread(
+    function(results, metadata) {
+      res.send({
+        result: "success",
+        data: results
       });
+    },
+    function(err) {}
+  );
 };
-
 
 // 회원가입
 // application/json
 // name, email, password, profile
 exports.register = async (req, res, next) => {
-
-  console.log('join');
+  console.log("join");
 
   const { name, email, password, profile } = req.body;
 
   let result = await searchOne({
     where: {
       name: name,
-      email: email,
+      email: email
     }
   });
 
@@ -57,7 +56,7 @@ exports.register = async (req, res, next) => {
     name: name,
     email: email,
     password: password,
-    profile: profile,
+    profile: profile
   })
     .then(result => {
       res.send({
@@ -79,7 +78,7 @@ exports.login = async (req, res, next) => {
 
   let result = await searchOne({
     where: {
-      email: req.body.email,
+      email: req.body.email
     }
   });
 
@@ -99,22 +98,61 @@ exports.login = async (req, res, next) => {
     return;
   }
 
-  authToken.createToken({
-    _id: result.dataValues.id,
-    email: result.dataValues.email,
-  }).then((token) => {
+  authToken
+    .createToken({
+      _id: result.dataValues.id,
+      email: result.dataValues.email
+    })
+    .then(token => {
+      res.send({
+        result: "success",
+        token: token,
+        data: {
+          id: result.dataValues.id,
+          name: result.dataValues.name,
+          profile: result.dataValues.profile
+        }
+      });
+    })
+    .catch(err => {
+      console.log("createToken error : " + err);
+    });
+};
 
+// Get all user list using admin page
+// exports.getAllUserList = async (req, res, next) => {
+//   User.findAll({
+//     order: [[ "id", "DESC" ]]
+//   }).then(result => {
+//     res.send({
+//       result: "success",
+//       data: result
+//     })
+//   }).catch(err => {
+//     console.log("[ERROR] getAllUserList : " + err);
+//   });
+// };
+
+exports.getAllUserList = async (req, res, next) => {
+  User.findAll({
+    attributes: {
+      include: [
+        "User.id", [Sequelize.fn('COUNT', Sequelize.col('User.id')), 'folder_count']
+      ]
+    },
+    include: [{
+      model: Folder_List,
+      // where: [ "user_id = id" ]
+      // required: true
+    }],
+    group: [ 'User.id' ],
+    // order: [[ "id", "DESC" ]],
+  }).then(result => {
     res.send({
       result: "success",
-      token: token,
-      data: {
-        id: result.dataValues.id,
-        name: result.dataValues.name,
-        profile: result.dataValues.profile
-      }
-    });
-
-  }).catch((err) => {
-    console.log('createToken error : ' + err);
+      data: result
+    })
+  }).catch(err => {
+    console.log("[ERROR] getAllUserList : " + err);
   });
-};
+}

@@ -27,5 +27,13 @@ module.exports = function(sequelize, DataTypes) {
         folder.hasMany(models.folder_list, { foreignKey: "folder_id" , onDelete : 'cascade' });
     };
 
+//       // Folder_List : Note = n : n
+//   folder_list.associate = models => {
+//     folder_list.hasMany(models.note, { foreignKey: "folder_id" });
+//   };
+//   folder_list.associate = models => {
+//     folder_list.belongsTo(models.user, { foreignKey: "user_id" });
+//   };
+
     return folder;
 };

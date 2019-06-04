@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  let user= sequelize.define('user', {
+  let user = sequelize.define("user", {
     id: {
       type: DataTypes.INTEGER(10).UNSIGNED,
       allowNull: false,
@@ -24,13 +24,12 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(300),
       allowNull: false
     }
-  }, {
-    tableName: 'user'
-  });
+  }, { tableName: "user" });
 
-  //user 1 : folder_list n
-  user.associate=(models) =>{
-    user.hasMany(models.folder_list, {foreignKey : 'user_id'});
+  // User : Folder_List  = 1 : n
+  // User : Notification = 1 : n
+  user.associate = models => {
+    user.hasMany(models.folder_list, { foreignKey: "user_id" });
   };
 
   return user;

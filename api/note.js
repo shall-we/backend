@@ -1,5 +1,6 @@
 let Note = require("../models").note;
 let Status = require("../models").status;
+let Folder_List = require("../models").folder_list;
 const Sequelize = require('sequelize');
 const uuid4=require('uuid4');
 
@@ -83,3 +84,29 @@ exports.setStatus=async (req, res, next) => {
     });
 }
 
+exports.getNoteCount = async (req, res, next) => {
+  Folder_List.findAll({
+    attributes: {
+      include: [
+        "Note.folder_id", [Sequelize.fn('COUNT', Sequelize.col('Note.folder_id')), 'note_count']
+      ]
+    },
+    include: [{
+      model: Note
+      // where: [ "user_id = id" ]
+      // required: true
+    }],
+    group: [ 'Note.folder_id' ],
+  }).then(result => {
+    res.send({
+      result: "success",
+      data: result
+    })
+  }).catch(err => {
+    console.log("[ERROR] getNoteCount : " + err);
+  });
+
+  Note.associate = models => {
+    Note.belongsTo(models.folder_list, { foreignKey: "folder_id" });
+  }
+}
