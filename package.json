@@ -21,7 +21,7 @@
     "express-mysql-session": "^2.1.0",
     "express-pino-logger": "^4.0.0",
     "express-session": "^1.16.1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.11",
     "mocha": "^6.1.4",
     "mongoose": "^5.5.11",
